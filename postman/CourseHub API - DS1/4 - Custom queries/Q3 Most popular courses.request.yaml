@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/courses/popular?limit=3"
+method: GET
+queryParams:
+  limit: "3"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Ranking is sorted, biggest first", function () { const r = pm.response.json(); pm.expect(r).to.be.an("array").that.is.not.empty; for (let i = 1; i < r.length; i++) { pm.expect(r[i-1].enrollments).to.be.at.least(r[i].enrollments); } });
+    language: text/javascript
+order: 4000

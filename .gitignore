@@ -1,0 +1,12 @@
+target/
+bin/
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.factorypath
+.settings/
+.env
+application-local.properties
+*.log

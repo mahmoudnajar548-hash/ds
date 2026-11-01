@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "studentId": {{studentId}},
+      "courseId": {{courseId}},
+      "rating": 9
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 400", function () { pm.response.to.have.status(400); });
+      const json = pm.response.json();
+      pm.test("fieldErrors.rating is present", function () { pm.expect(json.fieldErrors).to.have.property("rating"); });
+    language: text/javascript
+order: 10000

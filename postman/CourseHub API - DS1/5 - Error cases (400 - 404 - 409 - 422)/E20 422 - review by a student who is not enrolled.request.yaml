@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "studentId": {{studentBId}},
+      "courseId": {{courseId}},
+      "rating": 5
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 422", function () { pm.response.to.have.status(422); });
+      const json = pm.response.json();
+      pm.test("Business rule message", function () { pm.expect(json.message).to.include("enrolled"); });
+    language: text/javascript
+order: 20000

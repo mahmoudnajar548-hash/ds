@@ -1,0 +1,10 @@
+# Copy this file to application-local.properties (which is gitignored) and fill in your
+# MySQL credentials, then start the app with the profile "local":
+#
+#   mvn spring-boot:run -Dspring-boot.run.profiles=local
+#   or in Spring Tools: Run Configurations -> Arguments -> --spring.profiles.active=local
+#
+# Nothing secret is committed: application-local.properties is in .gitignore.
+
+spring.datasource.username=root
+spring.datasource.password=YOUR_MYSQL_PASSWORD

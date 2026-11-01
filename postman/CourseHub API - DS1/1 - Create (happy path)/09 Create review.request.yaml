@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reviews"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "studentId": {{studentId}},
+      "courseId": {{courseId}},
+      "rating": 5,
+      "comment": "Clear explanations, great examples."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", function () { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.test("Rating saved", function () { pm.expect(json.rating).to.eql(5); });
+      pm.collectionVariables.set("reviewId", json.id);
+    language: text/javascript
+order: 9000

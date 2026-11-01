@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/courses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Ghost course",
+      "price": 10,
+      "durationHours": 2,
+      "level": "BEGINNER",
+      "categoryId": 999999,
+      "instructorId": {{instructorId}}
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 404", function () { pm.response.to.have.status(404); });
+    language: text/javascript
+order: 2000

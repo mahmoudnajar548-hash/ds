@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/enrollments/student/{{studentId}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", function () { pm.response.to.have.status(200); });
+      pm.test("One enrollment", function () { pm.expect(pm.response.json().length).to.eql(1); });
+    language: text/javascript
+order: 8000

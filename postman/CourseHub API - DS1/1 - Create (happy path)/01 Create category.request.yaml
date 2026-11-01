@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/categories"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Programming {{suffix}}",
+      "description": "Software development courses"
+    }
+scripts:
+  - type: beforeRequest
+    code: pm.collectionVariables.set("suffix", Date.now().toString());
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", function () { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.test("Has an id and the right name", function () { pm.expect(json.id).to.be.a("number"); pm.expect(json.name).to.include("Programming"); });
+      pm.collectionVariables.set("categoryId", json.id);
+    language: text/javascript
+order: 1000

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/courses/search?keyword=spring&maxPrice=100"
+method: GET
+queryParams:
+  keyword: spring
+  maxPrice: "100"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Our course is found", function () { const id = Number(pm.collectionVariables.get("courseId")); pm.expect(pm.response.json().some(c => c.id === id)).to.be.true; });
+    language: text/javascript
+order: 1000

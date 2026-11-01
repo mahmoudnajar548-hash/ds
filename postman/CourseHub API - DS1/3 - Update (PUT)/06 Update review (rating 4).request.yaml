@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reviews/{{reviewId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "rating": 4,
+      "comment": "Very good, a bit fast in chapter 3."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", function () { pm.response.to.have.status(200); });
+      const json = pm.response.json();
+      pm.test("Rating is 4", function () { pm.expect(json.rating).to.eql(4); });
+    language: text/javascript
+order: 6000

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/instructors"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "firstName": "Sarah",
+      "lastName": "Connor",
+      "email": "sarah.{{suffix}}@coursehub.com",
+      "bio": "Senior Java developer and trainer"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", function () { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.test("Email saved", function () { pm.expect(json.email).to.include("@coursehub.com"); });
+      pm.collectionVariables.set("instructorId", json.id);
+    language: text/javascript
+order: 2000

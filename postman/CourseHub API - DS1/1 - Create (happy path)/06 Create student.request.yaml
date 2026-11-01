@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/students"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Amine Ben Salah",
+      "email": "student.{{suffix}}@esb.tn",
+      "birthDate": "2002-05-14"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", function () { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.collectionVariables.set("studentId", json.id);
+    language: text/javascript
+order: 6000

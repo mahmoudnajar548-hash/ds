@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/students/{{studentId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Amine Ben Salah",
+      "email": "student.{{suffix}}@esb.tn",
+      "birthDate": "2002-06-01"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", function () { pm.response.to.have.status(200); });
+      const json = pm.response.json();
+      pm.test("Birth date updated", function () { pm.expect(json.birthDate).to.eql("2002-06-01"); });
+    language: text/javascript
+order: 4000

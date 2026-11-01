@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/courses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Bad level",
+      "price": 10,
+      "durationHours": 2,
+      "level": "EXPERT",
+      "categoryId": {{categoryId}},
+      "instructorId": {{instructorId}}
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status is 400", function () { pm.response.to.have.status(400); });
+    language: text/javascript
+order: 6000

@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/enrollments/{{enrollmentId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "progress": 50
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", function () { pm.response.to.have.status(200); });
+      const json = pm.response.json();
+      pm.test("Progress is 50", function () { pm.expect(json.progress).to.eql(50); });
+    language: text/javascript
+order: 8000
