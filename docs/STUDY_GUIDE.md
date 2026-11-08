@@ -52,8 +52,8 @@ Student 1───* Review     *───1 Course
 **Walk-through of one request: `POST /api/enrollments` with `{"studentId":1,"courseId":2}`**
 
 1. Tomcat gets the HTTP request; Spring MVC finds `EnrollmentController.create` because of `@PostMapping` on path `/api/enrollments`.
-2. Jackson converts the JSON into an `EnrollmentRequest` record. `@Valid` runs the validation annotations. If a field is invalid → exception → `GlobalExceptionHandler` → **400**.
-3. The controller calls `enrollmentService.create(request)`. It contains no logic.
+2. Jackson converts the JSON into an `Enrollment` (the entity). `@Valid` runs the validation annotations. If a field is invalid → exception → `GlobalExceptionHandler` → **400**.
+3. The controller calls `enrollmentService.create(enrollment)`. It contains no logic.
 4. The service loads the student and the course (`findById`; missing → `ResourceNotFoundException` → **404**), checks the student is not already enrolled (→ **409**), builds an `Enrollment` (progress 0, ACTIVE, now) and calls `save`.
 5. Hibernate generates an `INSERT` (you see it in the console thanks to `show-sql=true`).
 6. The saved entity goes back up; Jackson turns it into JSON; `@ResponseStatus(CREATED)` makes the status **201**.
