@@ -1,6 +1,5 @@
 package com.mahmoud.coursehub.service;
 
-import com.mahmoud.coursehub.dto.InstructorRevenue;
 import com.mahmoud.coursehub.exception.ConflictException;
 import com.mahmoud.coursehub.exception.ResourceNotFoundException;
 import com.mahmoud.coursehub.model.EnrollmentStatus;
@@ -11,7 +10,9 @@ import com.mahmoud.coursehub.repository.InstructorRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -56,10 +57,14 @@ public class InstructorService {
     }
 
     // Business query: how much did this instructor earn? (cancelled enrollments do not count)
-    public InstructorRevenue getRevenue(Long id) {
+    public Map<String, Object> getRevenue(Long id) {
         Instructor instructor = getById(id);
         BigDecimal total = enrollmentRepository.sumRevenueByInstructor(id, EnrollmentStatus.CANCELLED);
-        return new InstructorRevenue(instructor.getId(), instructor.getFirstName() + " " + instructor.getLastName(), total == null ? BigDecimal.ZERO : total); // SUM returns null when there is no row
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("instructorId", instructor.getId());
+        result.put("instructorName", instructor.getFirstName() + " " + instructor.getLastName());
+        result.put("totalRevenue", total == null ? BigDecimal.ZERO : total); // SUM returns null when there is no row
+        return result;
     }
 
     private void checkEmailIsUnique(String email, Long currentId) {

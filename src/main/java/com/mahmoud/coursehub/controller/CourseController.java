@@ -1,8 +1,5 @@
 package com.mahmoud.coursehub.controller;
 
-import com.mahmoud.coursehub.dto.CoursePopularity;
-import com.mahmoud.coursehub.dto.CourseRating;
-import com.mahmoud.coursehub.dto.CourseRequest;
 import com.mahmoud.coursehub.model.Course;
 import com.mahmoud.coursehub.model.Student;
 import com.mahmoud.coursehub.service.CourseService;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -39,13 +37,13 @@ public class CourseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Course create(@Valid @RequestBody CourseRequest request) {
-        return courseService.create(request);
+    public Course create(@Valid @RequestBody Course course) {
+        return courseService.create(course);
     }
 
     @PutMapping("/{id}")
-    public Course update(@PathVariable Long id, @Valid @RequestBody CourseRequest request) {
-        return courseService.update(id, request);
+    public Course update(@PathVariable Long id, @Valid @RequestBody Course course) {
+        return courseService.update(id, course);
     }
 
     @DeleteMapping("/{id}")
@@ -63,7 +61,7 @@ public class CourseController {
 
     // GET /api/courses/popular?limit=5
     @GetMapping("/popular")
-    public List<CoursePopularity> popular(@RequestParam(defaultValue = "5") int limit) {
+    public List<Map<String, Object>> popular(@RequestParam(defaultValue = "5") int limit) {
         return courseService.getMostPopular(limit);
     }
 
@@ -81,7 +79,7 @@ public class CourseController {
 
     // GET /api/courses/7/rating
     @GetMapping("/{id}/rating")
-    public CourseRating rating(@PathVariable Long id) {
+    public Map<String, Object> rating(@PathVariable Long id) {
         return courseService.getRating(id);
     }
 

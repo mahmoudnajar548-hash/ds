@@ -1,7 +1,5 @@
 package com.mahmoud.coursehub.service;
 
-import com.mahmoud.coursehub.dto.EnrollmentRequest;
-import com.mahmoud.coursehub.dto.EnrollmentUpdateRequest;
 import com.mahmoud.coursehub.exception.BusinessRuleException;
 import com.mahmoud.coursehub.exception.ConflictException;
 import com.mahmoud.coursehub.exception.ResourceNotFoundException;
@@ -40,9 +38,17 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public Enrollment create(EnrollmentRequest request) {
-        Student student = studentRepository.findById(request.studentId()).orElseThrow(() -> new ResourceNotFoundException("Student", request.studentId()));
-        Course course = courseRepository.findById(request.courseId()).orElseThrow(() -> new ResourceNotFoundException("Course", request.courseId()));
+    public Enrollment create(Enrollment data) {
+        Long studentId = data.getStudent() == null ? null : data.getStudent().getId();
+        Long courseId = data.getCourse() == null ? null : data.getCourse().getId();
+        if (studentId == null) {
+            throw new BusinessRuleException("studentId is required");
+        }
+        if (courseId == null) {
+            throw new BusinessRuleException("courseId is required");
+        }
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student", studentId));
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
         // Business rule: one enrollment per student per course
         if (enrollmentRepository.existsByStudentIdAndCourseId(student.getId(), course.getId())) {
             throw new ConflictException(student.getFullName() + " is already enrolled in \'" + course.getTitle() + "\'");
@@ -57,20 +63,23 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public Enrollment update(Long id, EnrollmentUpdateRequest request) {
+    public Enrollment update(Long id, Enrollment data) {
         Enrollment enrollment = getById(id);
         // Business rule: a cancelled enrollment is frozen
         if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
             throw new BusinessRuleException("A cancelled enrollment cannot be modified");
         }
-        if (request.progress() != null) {
-            enrollment.setProgress(request.progress());
+        if (data.getProgress() != null) {
+            if (data.getProgress() < 0 || data.getProgress() > 100) {
+                throw new BusinessRuleException("Progress must be between 0 and 100");
+            }
+            enrollment.setProgress(data.getProgress());
         }
-        if (request.status() != null) {
-            enrollment.setStatus(request.status());
+        if (data.getStatus() != null) {
+            enrollment.setStatus(data.getStatus());
         }
         // Business rule: 100% progress means COMPLETED, and COMPLETED means 100% progress
-        if (enrollment.getStatus() == EnrollmentStatus.ACTIVE && enrollment.getProgress() == 100) {
+        if (enrollment.getStatus() == EnrollmentStatus.ACTIVE && Integer.valueOf(100).equals(enrollment.getProgress())) {
             enrollment.setStatus(EnrollmentStatus.COMPLETED);
         }
         if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {

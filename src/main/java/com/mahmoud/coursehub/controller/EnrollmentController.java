@@ -1,7 +1,5 @@
 package com.mahmoud.coursehub.controller;
 
-import com.mahmoud.coursehub.dto.EnrollmentRequest;
-import com.mahmoud.coursehub.dto.EnrollmentUpdateRequest;
 import com.mahmoud.coursehub.model.Enrollment;
 import com.mahmoud.coursehub.service.EnrollmentService;
 import jakarta.validation.Valid;
@@ -40,13 +38,14 @@ public class EnrollmentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Enrollment create(@Valid @RequestBody EnrollmentRequest request) {
-        return enrollmentService.create(request);
+    public Enrollment create(@Valid @RequestBody Enrollment enrollment) {
+        return enrollmentService.create(enrollment);
     }
 
+    // Only progress and status can change; the service checks the values.
     @PutMapping("/{id}")
-    public Enrollment update(@PathVariable Long id, @Valid @RequestBody EnrollmentUpdateRequest request) {
-        return enrollmentService.update(id, request);
+    public Enrollment update(@PathVariable Long id, @RequestBody Enrollment enrollment) {
+        return enrollmentService.update(id, enrollment);
     }
 
     @DeleteMapping("/{id}")

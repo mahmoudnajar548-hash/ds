@@ -1,6 +1,7 @@
 package com.mahmoud.coursehub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -164,6 +165,49 @@ public class Course {
 
     public void setReviews(final List<Review> reviews) {
         this.reviews = reviews;
+    }
+
+    // The API sends related ids (categoryId, instructorId, tagIds).
+    // These methods turn each id into a lightweight reference; the service then
+    // replaces the reference with the real row (or answers 404 if it does not exist).
+    // @JsonProperty maps the JSON name without creating a JavaBean property, so Spring Data
+    // still reads existsByCategoryId() as category.id.
+    @JsonProperty(value = "categoryId", access = JsonProperty.Access.WRITE_ONLY)
+    public void linkCategory(final Long categoryId) {
+        if (categoryId == null) {
+            this.category = null;
+            return;
+        }
+        Category reference = new Category();
+        reference.setId(categoryId);
+        this.category = reference;
+    }
+
+    @JsonProperty(value = "instructorId", access = JsonProperty.Access.WRITE_ONLY)
+    public void linkInstructor(final Long instructorId) {
+        if (instructorId == null) {
+            this.instructor = null;
+            return;
+        }
+        Instructor reference = new Instructor();
+        reference.setId(instructorId);
+        this.instructor = reference;
+    }
+
+    @JsonProperty(value = "tagIds", access = JsonProperty.Access.WRITE_ONLY)
+    public void linkTags(final Set<Long> tagIds) {
+        Set<Tag> references = new HashSet<>();
+        if (tagIds != null) {
+            for (Long tagId : tagIds) {
+                if (tagId == null) {
+                    continue;
+                }
+                Tag reference = new Tag();
+                reference.setId(tagId);
+                references.add(reference);
+            }
+        }
+        this.tags = references;
     }
 
     public Course() {

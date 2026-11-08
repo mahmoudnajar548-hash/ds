@@ -1,7 +1,5 @@
 package com.mahmoud.coursehub.service;
 
-import com.mahmoud.coursehub.dto.ReviewRequest;
-import com.mahmoud.coursehub.dto.ReviewUpdateRequest;
 import com.mahmoud.coursehub.exception.BusinessRuleException;
 import com.mahmoud.coursehub.exception.ConflictException;
 import com.mahmoud.coursehub.exception.ResourceNotFoundException;
@@ -42,9 +40,17 @@ public class ReviewService {
     }
 
     @Transactional
-    public Review create(ReviewRequest request) {
-        Student student = studentRepository.findById(request.studentId()).orElseThrow(() -> new ResourceNotFoundException("Student", request.studentId()));
-        Course course = courseRepository.findById(request.courseId()).orElseThrow(() -> new ResourceNotFoundException("Course", request.courseId()));
+    public Review create(Review data) {
+        Long studentId = data.getStudent() == null ? null : data.getStudent().getId();
+        Long courseId = data.getCourse() == null ? null : data.getCourse().getId();
+        if (studentId == null) {
+            throw new BusinessRuleException("studentId is required");
+        }
+        if (courseId == null) {
+            throw new BusinessRuleException("courseId is required");
+        }
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student", studentId));
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
         // Business rule 1: only a student who follows (or followed) the course can review it
         boolean enrolled = enrollmentRepository.existsByStudentIdAndCourseIdAndStatusNot(student.getId(), course.getId(), EnrollmentStatus.CANCELLED);
         if (!enrolled) {
@@ -57,17 +63,23 @@ public class ReviewService {
         Review review = new Review();
         review.setStudent(student);
         review.setCourse(course);
-        review.setRating(request.rating());
-        review.setComment(request.comment());
+        review.setRating(data.getRating());
+        review.setComment(data.getComment());
         review.setCreatedAt(LocalDateTime.now());
         return reviewRepository.save(review);
     }
 
     @Transactional
-    public Review update(Long id, ReviewUpdateRequest request) {
+    public Review update(Long id, Review data) {
+        if (data.getRating() == null || data.getRating() < 1 || data.getRating() > 5) {
+            throw new BusinessRuleException("Rating must be between 1 and 5");
+        }
+        if (data.getComment() != null && data.getComment().length() > 1000) {
+            throw new BusinessRuleException("Comment must not exceed 1000 characters");
+        }
         Review review = getById(id);
-        review.setRating(request.rating());
-        review.setComment(request.comment());
+        review.setRating(data.getRating());
+        review.setComment(data.getComment());
         return reviewRepository.save(review);
     }
 

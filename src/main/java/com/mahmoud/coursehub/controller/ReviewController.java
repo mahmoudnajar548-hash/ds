@@ -1,7 +1,5 @@
 package com.mahmoud.coursehub.controller;
 
-import com.mahmoud.coursehub.dto.ReviewRequest;
-import com.mahmoud.coursehub.dto.ReviewUpdateRequest;
 import com.mahmoud.coursehub.model.Review;
 import com.mahmoud.coursehub.service.ReviewService;
 import jakarta.validation.Valid;
@@ -40,13 +38,14 @@ public class ReviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Review create(@Valid @RequestBody ReviewRequest request) {
-        return reviewService.create(request);
+    public Review create(@Valid @RequestBody Review review) {
+        return reviewService.create(review);
     }
 
+    // Only rating and comment can change; the service checks the values.
     @PutMapping("/{id}")
-    public Review update(@PathVariable Long id, @Valid @RequestBody ReviewUpdateRequest request) {
-        return reviewService.update(id, request);
+    public Review update(@PathVariable Long id, @RequestBody Review review) {
+        return reviewService.update(id, review);
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,5 @@
 package com.mahmoud.coursehub.controller;
 
-import com.mahmoud.coursehub.dto.InstructorRevenue;
 import com.mahmoud.coursehub.model.Instructor;
 import com.mahmoud.coursehub.service.InstructorService;
 import jakarta.validation.Valid;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/instructors")
@@ -32,7 +32,7 @@ public class InstructorController {
     }
 
     @GetMapping("/{id}/revenue")
-    public InstructorRevenue getRevenue(@PathVariable Long id) {
+    public Map<String, Object> getRevenue(@PathVariable Long id) {
         return instructorService.getRevenue(id);
     }
 

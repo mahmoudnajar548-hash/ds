@@ -102,15 +102,15 @@ unique)`."
 |---|---|---|
 | Catalogue search by title + budget | `GET /api/courses/search?keyword=&maxPrice=` | JPQL `LIKE` |
 | Class roster (cancelled excluded) | `GET /api/courses/{id}/students` | JPQL `JOIN` |
-| Popular courses ranking | `GET /api/courses/popular?limit=` | `GROUP BY` + `SELECT new` |
+| Popular courses ranking | `GET /api/courses/popular?limit=` | `GROUP BY` + aggregated columns |
 | Instructor revenue | `GET /api/instructors/{id}/revenue` | `SUM` |
 | Course average rating | `GET /api/courses/{id}/rating` | `AVG` |
 
 **Say:** "DS1 asks for three custom queries; we wrote five, each answering a real business
 question. They use JPQL, so they are written against entities and fields, not tables —
 Hibernate translates them to SQL. The popularity query is the most interesting: it groups
-enrollments by course, counts them, orders descending, and builds a small DTO directly with
-`SELECT new`, limited by a `Pageable`."
+enrollments by course, counts them, orders descending, and returns the aggregated columns
+directly, limited by a `Pageable`."
 
 ---
 
@@ -162,7 +162,7 @@ request sets a timestamp suffix so names stay unique."
 > 400 / 404 / 409 / 422 handled centrally · 76 Postman tests · JUnit + H2 tests
 
 **Say:** "Everything DS1 asks for is covered and the API was verified end to end. Next steps
-would be authentication, pagination, and response DTOs everywhere."
+would be authentication, pagination, and a dedicated response model everywhere."
 
 ---
 
@@ -177,8 +177,8 @@ would be authentication, pagination, and response DTOs everywhere."
 | EAGER vs LAZY? | Eager loads with the entity; lazy loads on first access and needs an open session. |
 | `ddl-auto=update` vs `create`? | `update` adapts the schema and keeps data; `create` drops and recreates it. |
 | JPQL vs SQL? | JPQL uses entities and fields; Hibernate generates the SQL dialect. |
-| What is `SELECT new`? | A constructor expression that builds a DTO directly from the query. |
-| Why DTOs for courses? | The client sends ids instead of nested objects; the service resolves them and returns 404 if an id is unknown. |
+| How is the ranking query built? | It selects `c.id`, `c.title` and `COUNT(e)`, groups by course, orders by the count and limits the rows with `Pageable`. |
+| How are related rows sent? | The client sends ids (`categoryId`, `instructorId`, `tagIds`, `studentId`, `courseId`); a small link method on the entity turns each id into a reference, and the service loads the real row (404 if unknown). |
 | Why env variables for the DB password? | Secrets must never be committed to Git. |
 | `javax` vs `jakarta`? | Java EE became Jakarta EE; Spring Boot 3 uses `jakarta.*`. |
 | How does `findByCategoryId` work without SQL? | Spring Data parses the method name into a query at startup. |

@@ -1,8 +1,6 @@
 package com.mahmoud.coursehub.service;
 
-import com.mahmoud.coursehub.dto.CoursePopularity;
-import com.mahmoud.coursehub.dto.CourseRating;
-import com.mahmoud.coursehub.dto.CourseRequest;
+import com.mahmoud.coursehub.exception.BusinessRuleException;
 import com.mahmoud.coursehub.exception.ConflictException;
 import com.mahmoud.coursehub.exception.ResourceNotFoundException;
 import com.mahmoud.coursehub.model.Category;
@@ -22,8 +20,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,16 +48,16 @@ public class CourseService {
     }
 
     @Transactional
-    public Course create(CourseRequest request) {
+    public Course create(Course data) {
         Course course = new Course();
-        applyRequest(course, request);
+        apply(data, course);
         return courseRepository.save(course);
     }
 
     @Transactional
-    public Course update(Long id, CourseRequest request) {
+    public Course update(Long id, Course data) {
         Course course = getById(id);
-        applyRequest(course, request);
+        apply(data, course);
         return courseRepository.save(course);
     }
 
@@ -83,9 +84,18 @@ public class CourseService {
         return courseRepository.search(cleanKeyword, budget);
     }
 
-    public List<CoursePopularity> getMostPopular(int limit) {
+    public List<Map<String, Object>> getMostPopular(int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 50)); // keep between 1 and 50
-        return enrollmentRepository.findMostPopularCourses(EnrollmentStatus.CANCELLED, PageRequest.of(0, safeLimit));
+        List<Object[]> rows = enrollmentRepository.findMostPopularCourses(EnrollmentStatus.CANCELLED, PageRequest.of(0, safeLimit));
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("courseId", row[0]);
+            item.put("title", row[1]);
+            item.put("enrollments", row[2]);
+            result.add(item);
+        }
+        return result;
     }
 
     public List<Student> getStudents(Long courseId) {
@@ -93,32 +103,52 @@ public class CourseService {
         return studentRepository.findStudentsOfCourse(courseId, EnrollmentStatus.CANCELLED);
     }
 
-    public CourseRating getRating(Long courseId) {
+    public Map<String, Object> getRating(Long courseId) {
         Course course = getById(courseId);
         Double average = reviewRepository.findAverageRatingByCourseId(courseId);
         Double rounded = average == null ? null : Math.round(average * 100.0) / 100.0;
-        return new CourseRating(course.getId(), course.getTitle(), rounded, reviewRepository.countByCourseId(courseId));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("courseId", course.getId());
+        result.put("title", course.getTitle());
+        result.put("averageRating", rounded);
+        result.put("reviewCount", reviewRepository.countByCourseId(courseId));
+        return result;
     }
 
     // ---------- helpers ----------
-    // Copies the request into the entity, resolving ids into real entities (404 if one is unknown)
-    private void applyRequest(Course course, CourseRequest request) {
-        Category category = categoryRepository.findById(request.categoryId()).orElseThrow(() -> new ResourceNotFoundException("Category", request.categoryId()));
-        Instructor instructor = instructorRepository.findById(request.instructorId()).orElseThrow(() -> new ResourceNotFoundException("Instructor", request.instructorId()));
-        course.setTitle(request.title());
-        course.setDescription(request.description());
-        course.setPrice(request.price());
-        course.setDurationHours(request.durationHours());
-        course.setLevel(request.level());
+    // Copies the incoming course into the entity, resolving ids into real entities (404 if one is unknown)
+    private void apply(Course data, Course course) {
+        Long categoryId = data.getCategory() == null ? null : data.getCategory().getId();
+        Long instructorId = data.getInstructor() == null ? null : data.getInstructor().getId();
+        if (categoryId == null) {
+            throw new BusinessRuleException("categoryId is required");
+        }
+        if (instructorId == null) {
+            throw new BusinessRuleException("instructorId is required");
+        }
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
+        Instructor instructor = instructorRepository.findById(instructorId).orElseThrow(() -> new ResourceNotFoundException("Instructor", instructorId));
+        course.setTitle(data.getTitle());
+        course.setDescription(data.getDescription());
+        course.setPrice(data.getPrice());
+        course.setDurationHours(data.getDurationHours());
+        course.setLevel(data.getLevel());
         course.setCategory(category);
         course.setInstructor(instructor);
-        course.setTags(resolveTags(request.tagIds()));
+        course.setTags(resolveTags(data.getTags()));
     }
 
-    private Set<Tag> resolveTags(Set<Long> tagIds) {
+    private Set<Tag> resolveTags(Set<Tag> requestedTags) {
         Set<Tag> tags = new HashSet<>();
-        if (tagIds == null || tagIds.isEmpty()) {
+        if (requestedTags == null || requestedTags.isEmpty()) {
             return tags;
+        }
+        Set<Long> tagIds = new HashSet<>();
+        for (Tag tag : requestedTags) {
+            if (tag.getId() == null) {
+                throw new BusinessRuleException("Each tag must have an id");
+            }
+            tagIds.add(tag.getId());
         }
         List<Tag> found = tagRepository.findAllById(tagIds);
         Set<Long> foundIds = found.stream().map(Tag::getId).collect(Collectors.toSet());

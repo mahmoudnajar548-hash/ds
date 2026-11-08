@@ -1,6 +1,5 @@
 package com.mahmoud.coursehub.repository;
 
-import com.mahmoud.coursehub.dto.CoursePopularity;
 import com.mahmoud.coursehub.model.Enrollment;
 import com.mahmoud.coursehub.model.EnrollmentStatus;
 import org.springframework.data.domain.Pageable;
@@ -25,15 +24,15 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     boolean existsByStudentIdAndCourseIdAndStatusNot(Long studentId, Long courseId, EnrollmentStatus status);
 
     // CUSTOM QUERY 3 - popularity ranking: number of enrollments per course, biggest first.
-    // "SELECT new ..." builds a DTO directly; Pageable limits the number of rows.
+    // Returns one row per course: [courseId, title, enrollmentCount]. Pageable limits the rows.
     @Query("""
-            SELECT new com.mahmoud.coursehub.dto.CoursePopularity(c.id, c.title, COUNT(e))
+            SELECT c.id, c.title, COUNT(e)
             FROM Enrollment e JOIN e.course c
             WHERE e.status <> :excluded
             GROUP BY c.id, c.title
             ORDER BY COUNT(e) DESC, c.title ASC
             """)
-    List<CoursePopularity> findMostPopularCourses(@Param("excluded") EnrollmentStatus excluded, Pageable pageable);
+    List<Object[]> findMostPopularCourses(@Param("excluded") EnrollmentStatus excluded, Pageable pageable);
 
     // CUSTOM QUERY 4 - instructor revenue: sum of prices of the enrollments of his courses
     @Query("""

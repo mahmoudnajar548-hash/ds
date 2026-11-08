@@ -218,11 +218,11 @@ Need: the instructor wants the list of students (not cancelled). `JOIN s.enrollm
 
 **3. Popularity ranking** – `EnrollmentRepository.findMostPopularCourses`
 ```sql
-SELECT new com.mahmoud.coursehub.dto.CoursePopularity(c.id, c.title, COUNT(e))
+SELECT c.id, c.title, COUNT(e)
 FROM Enrollment e JOIN e.course c WHERE e.status <> :excluded
 GROUP BY c.id, c.title ORDER BY COUNT(e) DESC, c.title ASC
 ```
-Need: homepage "top courses". `SELECT new ...` builds a small DTO directly (no entity needed). The `Pageable` parameter (`PageRequest.of(0, limit)`) limits the number of rows (top N).
+Need: homepage "top courses". The query returns one `Object[]` row per course (`id`, `title`, count); the service turns each row into a `Map` with the same JSON keys (`courseId`, `title`, `enrollments`). The `Pageable` parameter (`PageRequest.of(0, limit)`) limits the number of rows (top N).
 
 **4. Instructor revenue** – `EnrollmentRepository.sumRevenueByInstructor`
 ```sql
@@ -306,13 +306,22 @@ public class CategoryController {
 | Update | PUT | 200 |
 | Delete | DELETE | 204 (no body) |
 
-### 3.8 DTOs (`dto` package)
+### 3.8 Request bodies and statistics (no separate DTO package)
 
-Java **records** (`public record CourseRequest(...)`) are immutable data holders; the compiler writes constructor/getters.
+There is no `dto` package. The entities are used directly as `@RequestBody`, and the JSON
+still names related rows by id (`categoryId`, `instructorId`, `tagIds`, `studentId`,
+`courseId`) exactly as before.
 
-- **Why `CourseRequest` instead of sending a `Course`?** To create a course the client would otherwise have to send nested objects (`"category": {"id": 1, ...}`), which is error-prone. With the DTO it sends `"categoryId": 1, "tagIds": [1,2]` and the service resolves the real entities (and answers 404 if an id is wrong). Same for `EnrollmentRequest`, `ReviewRequest`.
-- `CoursePopularity`, `CourseRating`, `InstructorRevenue` are **response** DTOs for the statistics endpoints (they are not tables).
-- Simple entities (Category, Tag, Student, Instructor) are used directly because they have no foreign key to send.
+- A small **link method** on the entity converts each id into a lightweight reference
+  (`linkCategory`, `linkInstructor`, `linkTags`, `linkStudent`, `linkCourse`). It is annotated
+  `@JsonProperty(access = WRITE_ONLY)`, so the id is accepted in a request but never appears
+  in a response (the response shows the real related object, as it did before).
+- The **service** then loads the real row by id, replaces the reference, and answers 404 if
+  the id does not exist. This keeps the controller thin and the rule in one place.
+- The update endpoints for `Enrollment` and `Review` also take the entity; only `progress` /
+  `status` or `rating` / `comment` are read, and the service checks those values.
+- The statistics endpoints (`popular`, `rating`, `revenue`) build a `LinkedHashMap` with the
+  aggregate values instead of a response class.
 
 ### 3.9 Exceptions (`exception` package)
 
@@ -363,7 +372,7 @@ The `suffix` variable (a timestamp) makes names/emails unique so you can run it 
 1. **(30 s) Context.** "CourseHub is the backend of an online learning platform: instructors publish courses, students enroll and review them. 7 entities."
 2. **(60 s) Data model.** Show the ER diagram from the README. Name the 3 relationship types: one-to-many (Category–Course), many-to-many (Course–Tag, join table), and the association entities (Enrollment, Review) that carry extra data.
 3. **(60 s) Architecture.** "Controller → Service → Repository → MySQL. Controllers only handle HTTP, services hold business rules, repositories use Spring Data." Give one rule as an example: cannot delete a category that still has courses (409).
-4. **(60 s) Custom queries.** Show 2–3: search, popularity ranking (`GROUP BY` + `SELECT new`), revenue.
+4. **(60 s) Custom queries.** Show 2–3: search, popularity ranking (`GROUP BY`), revenue.
 5. **(60 s) Validation and errors.** Show a failing POST in Postman (400 with `fieldErrors`) and explain `@Valid` + `@RestControllerAdvice`.
 6. **(30 s) Demo.** Postman Runner, all green.
 
@@ -386,8 +395,8 @@ Each team member should be ready to take any section.
 11. **What does `@Transactional` do?** Groups the database operations; rolls back all if an exception occurs.
 12. **How does `findByCategoryId` work without SQL?** Spring Data parses the method name into a query at startup.
 13. **JPQL vs SQL?** JPQL works on entities/fields; Hibernate translates it to SQL for the database.
-14. **What is `SELECT new ...`?** A constructor expression: the query result is built directly into a DTO.
-15. **Why DTOs for courses?** The client sends ids instead of nested objects; the service validates they exist; the API contract is separated from the table structure.
+14. **How does the popularity query return its rows?** It selects `c.id`, `c.title` and `COUNT(e)`; the service maps each row to a `Map` (`courseId`, `title`, `enrollments`).
+15. **How are related rows sent without DTOs?** The client sends ids; a write-only link method on the entity builds a reference and the service loads the real row (404 if unknown).
 16. **`@Valid` vs the annotations on the entity?** The annotations declare the rules; `@Valid` on the controller parameter triggers them. Hibernate also re-checks entities before saving.
 17. **Why PUT and not PATCH?** PUT replaces the whole resource, PATCH changes part of it. We use PUT for full updates (the enrollment PUT accepts optional fields, so it behaves partially; say this honestly if asked).
 18. **Why env variables for the DB password?** Secrets must not be committed to Git.
@@ -402,5 +411,5 @@ Each team member should be ready to take any section.
 
 - No authentication/authorization (not requested; Chapter 4+ material).
 - No pagination on list endpoints (`findAll`); fine for a mini project.
-- Entities are returned directly for the simple resources; a bigger project would use response DTOs everywhere.
+- Entities are returned directly for the simple resources; a bigger project would use a dedicated response model everywhere.
 - Money uses `BigDecimal` (correct), but there is no payment model: "revenue" is the sum of course prices of non-cancelled enrollments.

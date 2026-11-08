@@ -1,5 +1,6 @@
 package com.mahmoud.coursehub.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -91,6 +92,29 @@ public class Review {
 
     public void setCreatedAt(final LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // The API sends studentId / courseId; convert each id into a reference entity.
+    @JsonProperty(value = "studentId", access = JsonProperty.Access.WRITE_ONLY)
+    public void linkStudent(final Long studentId) {
+        if (studentId == null) {
+            this.student = null;
+            return;
+        }
+        Student reference = new Student();
+        reference.setId(studentId);
+        this.student = reference;
+    }
+
+    @JsonProperty(value = "courseId", access = JsonProperty.Access.WRITE_ONLY)
+    public void linkCourse(final Long courseId) {
+        if (courseId == null) {
+            this.course = null;
+            return;
+        }
+        Course reference = new Course();
+        reference.setId(courseId);
+        this.course = reference;
     }
 
     public Review() {
