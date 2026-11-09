@@ -1,0 +1,78 @@
+PASS | POST /api/categories -> 201 | expected 201 got 201 
+PASS | POST /api/instructors -> 201 | expected 201 got 201 
+PASS | POST /api/tags (java) -> 201 | expected 201 got 201 
+PASS | POST /api/tags (spring) -> 201 | expected 201 got 201 
+PASS | POST /api/courses -> 201, relations resolved | expected 201 got 201 
+PASS | POST /api/students -> 201 | expected 201 got 201 
+PASS | POST /api/enrollments -> 201 | expected 201 got 201 
+PASS | PUT /api/enrollments/{id} progress 50 -> 200 | expected 200 got 200 
+PASS | POST /api/reviews -> 201 | expected 201 got 201 
+PASS | GET /api/categories -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/instructors -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/tags -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/students -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/courses -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/enrollments -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/reviews -> 200 non-empty | expected 200 got 200 
+PASS | GET /api/categories/{id} -> 200 | expected 200 got 200 
+PASS | GET /api/instructors/{id} -> 200 | expected 200 got 200 
+PASS | GET /api/tags/{id} -> 200 | expected 200 got 200 
+PASS | GET /api/students/{id} -> 200 | expected 200 got 200 
+PASS | GET /api/courses/{id} -> 200 | expected 200 got 200 
+PASS | GET /api/enrollments/{id} -> 200 | expected 200 got 200 
+PASS | GET /api/reviews/{id} -> 200 | expected 200 got 200 
+PASS | PUT /api/categories/{id} -> 200 | expected 200 got 200 
+PASS | PUT /api/instructors/{id} -> 200 | expected 200 got 200 
+PASS | PUT /api/tags/{id} -> 200 | expected 200 got 200 
+PASS | PUT /api/students/{id} -> 200 | expected 200 got 200 
+PASS | PUT /api/courses/{id} -> 200 (new price) | expected 200 got 200 
+PASS | PUT /api/reviews/{id} -> 200 (rating 4) | expected 200 got 200 
+PASS | Q1 search keyword+price -> 200 contains course | expected 200 got 200 
+PASS | Q1b search budget too low -> 200 empty | expected 200 got 200 
+PASS | Q2 class roster -> 200 contains student | expected 200 got 200 
+PASS | Q3 popular courses -> 200 sorted desc | expected 200 got 200 
+PASS | Q4 instructor revenue -> 39.99 | expected 200 got 200 
+PASS | Q5 course average rating -> 4.0 | expected 200 got 200 
+PASS | Q6 courses of a category -> 200 contains course | expected 200 got 200 
+PASS | Q7 enrollments of a student -> 200 contains enrollment | expected 200 got 200 
+PASS | Q8 reviews of a course -> 200 contains review | expected 200 got 200 
+PASS | E01 404 unknown category | expected 404 got 404 
+PASS | E02 404 course with unknown category | expected 404 got 404 
+PASS | E03 404 unknown URL | expected 404 got 404 
+PASS | E04 400 blank category name + fieldErrors | expected 400 got 400 
+PASS | E05 400 invalid course (3 field errors) | expected 400 got 400 
+PASS | E06 400 invalid enum level=EXPERT | expected 400 got 400 
+PASS | E07 400 malformed JSON | expected 400 got 400 
+PASS | E08 400 invalid email | expected 400 got 400 
+PASS | E09 400 id is not a number | expected 400 got 400 
+PASS | E10 400 review rating out of range | expected 400 got 400 
+PASS | E11 409 duplicate category name | expected 409 got 409 
+PASS | E12 409 duplicate student email | expected 409 got 409 
+PASS | E13 409 student already enrolled | expected 409 got 409 
+PASS | E14 409 student already reviewed this course | expected 409 got 409 
+PASS | E15 409 cannot delete category that has courses | expected 409 got 409 
+PASS | E16 409 cannot delete instructor that has courses | expected 409 got 409 
+PASS | E17 409 cannot delete course that has enrollments | expected 409 got 409 
+PASS | E18 409 cannot delete student that has enrollments | expected 409 got 409 
+PASS | E19 (setup) create second student -> 201 | expected 201 got 201 
+PASS | E20 422 review by a non-enrolled student | expected 422 got 422 
+PASS | E21 (setup) enroll second student -> 201 | expected 201 got 201 
+PASS | E22 (setup) cancel enrollment -> 200 | expected 200 got 200 
+PASS | E23 422 cancelled enrollment cannot be modified | expected 422 got 422 
+PASS | E24 cancelled student is not in the roster | expected 200 got 200 
+PASS | E25 100% progress auto-completes enrollment | expected 200 got 200 
+PASS | DELETE /api/tags/{id} (detached first) -> 204 | expected 204 got 204 
+PASS | Course now has only 1 tag | expected 200 got 200 
+PASS | DELETE /api/reviews/{id} -> 204 | expected 204 got 204 
+PASS | DELETE enrollment B -> 204 | expected 204 got 204 
+PASS | DELETE enrollment A -> 204 | expected 204 got 204 
+PASS | DELETE student B -> 204 | expected 204 got 204 
+PASS | DELETE student A -> 204 | expected 204 got 204 
+PASS | DELETE course -> 204 | expected 204 got 204 
+PASS | DELETE tag 1 -> 204 | expected 204 got 204 
+PASS | DELETE instructor -> 204 | expected 204 got 204 
+PASS | DELETE category -> 204 | expected 204 got 204 
+PASS | Course is really gone -> 404 | expected 404 got 404 
+PASS | Deleting again -> 404 | expected 404 got 404 
+
+TOTAL=76 PASS=76 FAIL=0

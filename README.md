@@ -201,7 +201,7 @@ src/main/java/com/mahmoud/coursehub/
 src/main/resources/application.properties
 src/test/                         automated tests (MockMvc + H2)
 postman/                          exported Postman collection (v2.1 file + v3 folder)
-docs/                             study guide, DS1 compliance, presentation, screenshots
+docs/                             study guide, DS1 compliance, slide deck, screenshots
 ```
 
 ## 9. DS1 deliverables
@@ -212,7 +212,7 @@ docs/                             study guide, DS1 compliance, presentation, scr
 | Teacher added as collaborator (`awadi.hatem@gmail.com`) | GitHub → Settings → Collaborators |
 | `README.md` (context, entities, endpoints, execution) | this file |
 | Exported screenshots of successful Postman tests | `docs/screenshots/` |
-| 5-minute presentation | `docs/PRESENTATION.md` |
+| 5-minute presentation | `docs/presentation/CourseHub_DS1_Presentation.pptx` (script: `docs/presentation/SPEAKER_SCRIPT.md`) |
 | Requirement-by-requirement check | `docs/DS1_COMPLIANCE.md` |
 
 ## 10. Troubleshooting

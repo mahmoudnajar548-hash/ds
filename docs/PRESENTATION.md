@@ -1,6 +1,11 @@
-# CourseHub – 5-minute presentation
+# CourseHub - 5-minute presentation
 
-Target: **5 minutes**, 8 slides. Each slide has the text to show and the words to say.
+> **Ready-to-show deck:** [`presentation/CourseHub_DS1_Presentation.pptx`](presentation/CourseHub_DS1_Presentation.pptx)
+> — 10 slides, 16:9, with speaker notes and rendered code screenshots.
+> The exact timing is in [`presentation/SPEAKER_SCRIPT.md`](presentation/SPEAKER_SCRIPT.md).
+> This file is the long-form script if you prefer to present without slides.
+
+Target: **5 minutes**. Each slide has the text to show and the words to say.
 Every team member should be able to take any slide (DS1 grading criterion: *Presentation and
 Understanding of the Project*).
 
