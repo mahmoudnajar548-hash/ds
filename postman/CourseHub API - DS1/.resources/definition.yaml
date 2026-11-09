@@ -1,5 +1,5 @@
 $kind: collection
 description: "Run the whole collection with the Collection Runner (requests are ordered and share variables). Folders: 1 create, 2 read, 3 update, 4 custom queries, 5 error cases, 6 cleanup."
 variables:
-  baseUrl: http://localhost:8080
+  baseUrl: http://localhost:8081
   suffix: "1"

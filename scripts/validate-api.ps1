@@ -4,13 +4,13 @@
 # so the results can be reproduced from a terminal or a CI job.
 #
 # Usage:
-#   pwsh -File scripts/validate-api.ps1                       # http://localhost:8080
-#   pwsh -File scripts/validate-api.ps1 -BaseUrl http://localhost:8081
+#   pwsh -File scripts/validate-api.ps1                       # http://localhost:8081
+#   pwsh -File scripts/validate-api.ps1 -BaseUrl http://localhost:8080
 #
 # Exit code 0 = all checks passed, 1 = at least one check failed.
 
 param(
-    [string]$BaseUrl = 'http://localhost:8080'
+    [string]$BaseUrl = 'http://localhost:8081'
 )
 
 $ErrorActionPreference = 'Stop'

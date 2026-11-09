@@ -125,10 +125,18 @@ export DB_PASSWORD=your_mysql_password
 mvn spring-boot:run
 ```
 
-The API listens on `http://localhost:8080`. Optional: set `DB_URL` to use another database URL.
+The API listens on `http://localhost:8080` by default (Spring Boot's `server.port`). Optional:
+set `DB_URL` to use another database URL.
 
-If port 8080 is already used on your machine, run `mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081`
-and set the Postman collection variable `baseUrl` to `http://localhost:8081`.
+On the development machine port 8080 is taken by Oracle XE, so the project is run on **8081**:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+```
+
+The bundled Postman files and `scripts/validate-api.ps1` default to `http://localhost:8081`.
+If you run on the default port instead, set the collection/environment variable `baseUrl` (or
+pass `-BaseUrl http://localhost:8080` to the script).
 
 Automated tests (use an in-memory H2 database, MySQL is not needed):
 
@@ -183,7 +191,7 @@ place (useful when 8080 is already taken).
 Then:
 
 1. Start the application (`mvn spring-boot:run`).
-2. Check the collection variable `baseUrl` (`http://localhost:8080` by default).
+2. Check the collection variable `baseUrl` (`http://localhost:8081` by default).
 3. Open the collection, click **Run**, keep the default order, and run it.
 
 The collection contains 76 requests with assertions: create, read, update, 9 custom-query checks, 25 error cases (400, 404, 409, 422) and a cleanup folder. Screenshots of a successful run go in `docs/screenshots/`.

@@ -18,7 +18,7 @@ How to reproduce:
 1. Start the API: `mvn spring-boot:run` (the MySQL database `coursehub` is created automatically),
    or `pwsh -File scripts/run-h2.ps1` / the `demo` profile if MySQL is not available.
 2. In Postman, import `postman/CourseHub.postman_collection.json`.
-3. Check the collection variable `baseUrl` (default `http://localhost:8080`).
+3. Check the collection variable `baseUrl` (default `http://localhost:8081`, matching the `demo` run command).
 4. Select the collection → **Run** → keep the order → **Run CourseHub API - DS1**.
 5. Screenshot the summary, then open the individual requests above and screenshot each response.
 
